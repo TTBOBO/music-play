@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta name="referrer" content="no-referrer">
+		<title></title>
+		<script src="js/mui.min.js"></script>
+		<script src="js/jquery-1.7.2.min.js"></script>
+		<script type="text/javascript" src="js/swiper.animate1.0.2.min.js" ></script>
+		<script type="text/javascript" src="js/swiper.min.js" ></script>
+		<link rel="stylesheet" href="css/swiper.min.css" />
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<link rel="stylesheet" href="css/animate.min.css" />
+		<link rel="stylesheet" href="css/index.css" />
+		<!--<link rel="stylesheet" href="css/mui.min.css" />-->
+		<link rel="stylesheet" href="http://at.alicdn.com/t/font_1467430166_4040916.css">
+		
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<h1 class="mui-title" style="z-index: 999; color: #fff;"></h1>
+		</header>
+		<div class="mui-content">
+			<!--磨砂背景图-->
+			<div class="box"></div>
+
+			<div class="container">
+				<!--<div class="author"></div>
+				<div class="music-type"></div>-->
+				<div class="swiper-container">
+				    <div class="swiper-wrapper">
+				        <div class="swiper-slide">
+				        	<div class="author ani" swiper-animate-effect="bounceInDown" swiper-animate-duration=".5s" swiper-animate-delay="1.5s"></div>
+						<div class="music-type ani" swiper-animate-effect="bounceInDown" swiper-animate-duration=".5s" swiper-animate-delay="1s"></div>
+				        	<div class="pic ani" swiper-animate-effect="rubberBand" swiper-animate-duration="1s" swiper-animate-delay="2s">
+								<div class="mask"></div>
+								<div class="musicbg"></div>
+							</div>
+				        </div>
+				        <div class="swiper-slide" id="lyric">
+				        	<div class="music-lyric" style="display:block">
+						 		<div class="lyric-view">
+						 			<ul class="lyric"></ul>
+						 		</div>
+						 	</div>
+				        </div>
+				    </div>
+				    <div class="swiper-pagination"></div>
+				</div>
+				
+				<div class="content">
+					<audio src=""></audio>
+					<div class="music-message">
+						<p class="music-name" title=""></p>
+						<p class="musicer" title=""></p>
+						<p class="record" title="" data-id=""></p>
+
+					</div>
+					<div class="music-icon">
+						<span class="m-icon m-star colored" id=""></span>
+						<span class="m-icon m-heart colored" id=""></span></a>
+					</div>
+					<!--进度条-->
+					<div class="tool">
+						<div class="currentTime"></div>
+						<div class="baseBox">
+							<span class="basebar">
+								<span class="progressbar"></span>
+							</span>
+						</div>
+						<div class="durationTime"></div>
+					</div>
+					<div class="controls" style="z-index: 999;">
+						<div class="play-control">
+							<!--音乐播放。换频道 下一曲按钮-->
+							<ul>
+								<li><span class="m-icon m-xunhuan colored"></span></li>
+								<li><span class="mui-icon mui-icon-back btn3" title="换频道"></span></li>
+								<li><span class="m-icon m-play btn1" title="播放/暂停"></span></li>
+								<li><span class="mui-icon mui-icon-arrowright btn3" title="换曲"></span></li>
+								<li><a href="#topPopover"><span class=" btn2" title="换频道">1231</span></a></li>
+							</ul>
+							
+						</div>
+						<div id="topPopover" class="mui-popover">
+							<!--<div class="mui-popover-arrow"></div>-->
+							<div class="mui-scroll-wrapper">
+								<div class="mui-scroll">
+									<ul class="mui-table-view">
+										
+									</ul>
+								</div>
+							</div>
+				
+						</div>
+						<!--<div class="music-control">
+							<span class="m-icon m-xunhuan colored"></span>
+							<span class="m-icon m-lyric colored lyriced"></span>
+						</div>-->
+					</div>
+					
+				</div>
+			</div>
+
+		</div>
+		<script type="text/javascript" charset="utf-8">
+			mui.init();
+			mui('.mui-scroll-wrapper').scroll();
+			mui('body').on('shown', '.mui-popover', function(e) {
+//				console.log('shown', e.detail.id);//detail为当前popover元素
+			});
+			mui('body').on('hidden', '.mui-popover', function(e) {
+//				console.log('hidden', e.detail.id);//detail为当前popover元素
+			});
+		</script>
+		<script>
+			
+			
+			var myAudio = $("audio")[0];
+			var lyricArr = [];
+			console.log(myAudio.currentTime);
+			console.log(myAudio.duration)
+			$(".btn1").click(() => {
+				if(myAudio.paused) {
+					play();
+				} else {
+					pause();
+				}
+			})
+			//播放
+			function play() {
+				myAudio.play();
+				$('.btn1').removeClass('m-play').addClass('m-pause');
+				$('.musicbg').css({
+					'animation-play-state': 'running'
+				});
+				$('.musicbg').addClass('transfrom')
+			}
+			//暂停
+			function pause() {
+				myAudio.pause();
+				$('.btn1').removeClass('m-pause').addClass("m-play");
+				$('.musicbg').css({
+					'animation-play-state': 'paused'
+				});
+			}
+			//更换频道
+//			$('.btn2').click(() => {
+//				mui.toast("切换频道成功")
+//				getChannel();
+//			})
+			//更换音乐
+			$('.btn3').click(() => {
+				getMusic();
+			})
+
+			//进度条
+			setInterval(present, 500) //每0.5秒计算进度条长度
+			$(".basebar").mousedown(function(ev) { //拖拽进度条控制进度
+				var posX = ev.clientX;
+				var targetLeft = $(this).offset().left;
+				var percentage = (posX - targetLeft) / 315 * 100;
+				console.log(percentage)
+				console.log(posX - targetLeft)
+				myAudio.currentTime = myAudio.duration * percentage / 100;
+			});
+
+			function present() {
+				var length = myAudio.currentTime / myAudio.duration * 100;
+				$('.progressbar').width(length + '%'); //设置进度条长度
+				//自动下一曲
+				if(myAudio.currentTime == myAudio.duration) {
+					getMusic()
+				}
+			}
+		</script>
+		<script>
+			//获取音乐频道
+			function getChannel() {
+				$.ajax({
+					url: 'http://api.jirengu.com/fm/getChannels.php',
+					dataType: 'json',
+					Method: 'get',
+					success: function(res) {
+						console.log(JSON.stringify(res))
+						var data = res.channels;
+						apChannelList(data)
+						
+						var num = Math.floor(Math.random() * data.length);
+						var dataName = data[num].name;
+						var dataId = data[num].channel_id;
+						$('.music-type').text("类型:" + dataName);
+						$('.music-type').attr('title', dataName);
+						$('.btn2').text(dataName)
+						$(".record").attr('data-id', dataId);
+						getMusic();
+
+					}
+				});
+			}
+			
+			//添加类型列表
+			function apChannelList(data){
+				var dataList = "";
+				console.log(data.length)
+				for (var i in data) {
+					dataList += '<li class="mui-table-view-cell" '+ ' data-id='+data[i].channel_id+'>'+data[i].name+"</li>"
+				}
+				$(".mui-table-view").append(dataList);
+				$(".mui-scroll ul li").click(function(){
+					
+					var index = $(this).index();
+					var li =$(".mui-scroll ul li");
+					console.log(index);
+					console.log(li.eq(index).text()+" :"+li.eq(index).attr('data-id'))
+					$('.music-type').text("类型:" + li.eq(index).text());
+					$('.btn2').text(li.eq(index).text())
+					$(".record").attr('data-id', li.eq(index).attr('data-id'));
+					$(".mui-popover").css({'display':"none"});
+					$(".mui-popover").removeClass("mui-active")
+					$(".mui-backdrop").css({'opacity':'0','display':"none"});
+					$(".mui-backdrop").remove();
+					getMusic();
+				})
+			}
+			//获取音乐
+			function getMusic() {
+				$.ajax({
+					url: 'http://api.jirengu.com/fm/getSong.php',
+					dataType: 'json',
+					method: 'get',
+					data: {
+						//获取data-id传值获取音乐信息
+						'channel': $('.record').attr('data-id')
+					},
+					success: function(res) {
+						console.log(res)
+						var resource = res.song[0],
+							url = resource.url,
+							sid = resource.sid,
+							bgPic = resource.picture,
+							ssid = resource.ssid,
+							title = resource.title,
+							author = resource.artist
+						$("audio").attr('src', url);
+						$('audio').attr('sid',sid);
+						$('audio').attr('ssid',ssid);
+						$('.pic').css({'display':'block'})
+						$(".musicbg").css({
+							'background': 'url(' + bgPic + ')',
+							'background-repeat': 'no-repeat',
+							'background-position': 'center',
+							'background-size': 'cover',
+						});
+						$(".box").css({
+							'background': 'url(' + bgPic + ')',
+							'background-repeat': 'no-repeat',
+							'background-position': 'center',
+							'background-size': 'cover',
+						});
+						$(".mui-title").text(title);
+						$(".author").text("— " + author + " —");
+						setTimeout(() => {
+							play(); //播放
+							getlyric();//获取歌词
+						}, 888)
+						setTimeout(() => {
+							var myAudio = $("audio")[0];
+							$(".currentTime").text(getTIme(myAudio.currentTime))
+							setInterval(function() {
+								var i = 0;
+								$(".currentTime").text(getTIme(myAudio.currentTime))
+								i++
+							}, 1000)
+							$(".durationTime").text(getTIme(myAudio.duration))
+							$(".timer").css({
+								'display': 'block'
+							})
+
+						}, 1000)
+					}
+				})
+			}
+			
+			
+			//获取歌词
+			function getlyric(){
+				var sid = $('audio').attr('sid');
+					console.log('sid:'+sid)
+				$.post('http://jirenguapi.applinzi.com/fm/getLyric.php',{sid:sid},(res) =>{
+					var res = JSON.parse(res);
+					res.lyric = res.lyric.replace(/饥人谷/,"涂爱波");
+					console.log(res.lyric);
+					if (!!res.lyric) {
+	        			$('.music-lyric .lyric').empty();//清空歌词信息
+			        	var line = res.lyric.split('\n');//歌词为以排数为界的数组
+		                var timeReg = /\[\d{2}:\d{2}.\d{2}\]/g;//时间的正则
+		                var result = [];
+		                console.log(line.length)
+		                if(line != ""){
+		                	for (var i in line) {
+		                		var time = line[i].match(timeReg);
+		                		if(!time)
+		                			continue;
+		                		var value = line[i].replace(timeReg,"");
+		                		for (var j in time) {
+		                			var t = time[j].slice(1,-1).split(":");
+		                			var timeArr = parseInt(t[0],10)*60 +parseFloat(t[1])
+		                			result.push([timeArr,value]);
+		                		}
+		                	}
+		                }
+		                result.sort((a,b) =>{
+		                	return a[0] - b[0];
+		                });
+		                
+		                lyricArr = result;
+		                renderLyric();
+	        		}
+	                
+				}).fail(function(){
+		        	$('.music-lyric .lyric').html("<li>本歌曲展示没有歌词</li>");
+		        })
+			}
+			
+			
+			function renderLyric(){
+				var lyrLi = "";
+			    for (var i = 0; i < lyricArr.length; i++) {
+			        lyrLi += "<li data-time='"+lyricArr[i][0]+"'>"+lyricArr[i][1]+"</li>";
+			    }
+			    $('.music-lyric .lyric').append(lyrLi);
+			    setInterval(showLyric,100);//怎么展示歌词
+			}
+			function showLyric(){
+			    var liH = $(".lyric li").eq(5).outerHeight()-3; //每行高度
+			    for(var i=0;i< lyricArr.length;i++){//遍历歌词下所有的li
+			        var curT = $(".lyric li").eq(i).attr("data-time");//获取当前li存入的当前一排歌词时间
+			        var nexT = $(".lyric li").eq(i+1).attr("data-time");
+			        var curTime = myAudio.currentTime;
+			        if ((curTime > curT) && (curT < nexT)){//当前时间在下一句时间和歌曲当前时间之间的时候 就渲染 并滚动
+			            $(".lyric li").removeClass("active");
+			            $(".lyric li").eq(i).addClass("active");
+			            $('.music-lyric .lyric').css('top', -liH*(i-2));
+			        }
+			    }
+			}
+			
+			$(document).ready(getChannel())
+
+			//时间转换
+			function getTIme(time) {
+				var i = 0;
+				var s = parseInt(time);
+				if(time > 60) {
+					i = parseInt(s / 60);
+					s = parseInt(s % 60)
+				}
+
+				var zero = function(s) {
+					return s < 10 ? "0" + s : s
+				}
+				return [zero(i), zero(s)].join(":")
+			}
+		</script>
+		<script>
+			mui.ready(function() {
+				var sid = $('audio').attr('sid');
+					var ssid = $('audio').attr('ssid');
+					console.log('sid'+sid+'ssid'+ssid);
+				var height = window.screen.height;
+				console.log(height);
+				$(".mui-content").css({
+					'height': height + 'px'
+				});
+				
+				$(".m-star").click(() => {
+					console.log($('.m-star').attr('id'))
+					if($('.m-star').attr('id') == ""){
+						mui.toast("收藏到歌单");
+						$('.m-star').attr('id','red')
+					}else{
+						mui.toast("取消收藏");
+						$('.m-star').attr('id',"")
+					}
+				})
+				$(".m-heart").click(() => {
+					console.log($('.m-star').attr('id'))
+					if($('.m-heart').attr('id') == ""){
+						mui.toast("收藏到我的喜欢")
+						$('.m-heart').attr('id','red')
+					}else{
+						mui.toast("已移除");
+						$('.m-heart').attr('id',"")
+					}
+				});
+				
+				var mySwiper = new Swiper('.swiper-container',{
+					pagination : '.swiper-pagination',
+					//pagination : '#swiper-pagination1',
+					
+					onSlideChangeEnd:function(swiper){
+						swiperAnimate(swiper);
+					},
+					onInit:function(swiper){
+						setTimeout(function(){
+							swiperAnimate(swiper);
+						},100);
+					}
+				})
+					
+			})
+		</script>
+	</body>
+
+</html>
